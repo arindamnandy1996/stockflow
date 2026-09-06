@@ -46,13 +46,24 @@ public class MongoDBConnection {
     /**
      * Loads key-value pairs from .env file if available in working directory, parent directory, or classpath.
      */
-    private static void loadDotEnv() {
+    public static synchronized void loadDotEnv() {
+        if (!ENV_CONFIG.isEmpty()) {
+            return;
+        }
+
+        String catalinaBase = System.getProperty("catalina.base");
+        String catalinaHome = System.getProperty("catalina.home");
+        String userDir = System.getProperty("user.dir");
+
         // Try locating .env in common locations
         String[] potentialPaths = {
             ".env",
             "../.env",
-            System.getProperty("user.dir") + File.separator + ".env",
-            System.getProperty("catalina.base") != null ? System.getProperty("catalina.base") + File.separator + ".env" : null
+            userDir != null ? userDir + File.separator + ".env" : null,
+            catalinaBase != null ? catalinaBase + File.separator + ".env" : null,
+            catalinaBase != null ? catalinaBase + File.separator + "conf" + File.separator + ".env" : null,
+            catalinaHome != null ? catalinaHome + File.separator + ".env" : null,
+            catalinaHome != null ? catalinaHome + File.separator + "conf" + File.separator + ".env" : null
         };
 
         boolean loaded = false;
@@ -71,17 +82,33 @@ public class MongoDBConnection {
             }
         }
 
-        // Fallback: try loading from classpath as a resource stream
+        // Fallback: try loading from classpath as a resource stream across multiple ClassLoaders
         if (!loaded) {
-            try (InputStream is = MongoDBConnection.class.getClassLoader().getResourceAsStream(".env")) {
+            InputStream is = null;
+            try {
+                ClassLoader contextCl = Thread.currentThread().getContextClassLoader();
+                if (contextCl != null) {
+                    is = contextCl.getResourceAsStream(".env");
+                }
+                if (is == null) {
+                    is = MongoDBConnection.class.getClassLoader().getResourceAsStream(".env");
+                }
+                if (is == null) {
+                    is = MongoDBConnection.class.getResourceAsStream("/.env");
+                }
                 if (is != null) {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                         parseEnvReader(reader);
                         LOGGER.info("Loaded environment configuration from classpath .env");
+                        loaded = true;
                     }
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.FINE, "Could not load .env from classpath", e);
+            } finally {
+                if (is != null) {
+                    try { is.close(); } catch (Exception ignored) {}
+                }
             }
         }
     }
@@ -129,7 +156,10 @@ public class MongoDBConnection {
             return val.trim();
         }
 
-        // 3. Loaded .env properties
+        // 3. Loaded .env properties (ensure dot env is loaded)
+        if (ENV_CONFIG.isEmpty()) {
+            loadDotEnv();
+        }
         val = ENV_CONFIG.get(key);
         if (val != null && !val.trim().isEmpty()) {
             return val.trim();
