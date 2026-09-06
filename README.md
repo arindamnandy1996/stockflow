@@ -313,8 +313,8 @@ Both projects produce standard Web Application Archive (`.war`) files located in
    %CATALINA_HOME%\bin\startup.bat
    ```
 3. Access the portals:
-   - **Customer & Ops Portal**: `http://localhost:8080/stockflow-customer/`
-   - **User Ordering Portal**: `http://localhost:8080/stockflow-user/`
+   - **Customer & Ops Portal**: `http://localhost:8085/stockflow-customer/`
+   - **User Ordering Portal**: `http://localhost:8085/stockflow-user/`
 
 ---
 
