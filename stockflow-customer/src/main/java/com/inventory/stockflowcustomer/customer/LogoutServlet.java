@@ -1,4 +1,4 @@
-package com.inventory.stockflowcustomer;
+package com.inventory.stockflowcustomer.customer;
 
 import java.io.IOException;
 import javax.servlet.ServletException;

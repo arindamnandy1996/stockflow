@@ -1,4 +1,4 @@
-package com.inventory.stockflowcustomer;
+package com.inventory.stockflowcustomer.customer;
 
 import com.inventory.stockflowcustomer.dao.CustomerDAO;
 import com.inventory.stockflowcustomer.model.Customer;

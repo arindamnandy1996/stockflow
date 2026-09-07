@@ -43,13 +43,13 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/customer/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/customer/css/style.css?v=2.2">
     
     <style>
         .dashboard-layout {
@@ -76,6 +76,8 @@
             font-size: 1.3rem;
             font-weight: 800;
             margin-bottom: 36px;
+            text-decoration: none;
+            color: var(--text-main);
         }
 
         .dash-nav {
@@ -93,7 +95,16 @@
             font-size: 0.92rem;
             font-weight: 600;
             color: var(--text-muted);
+            text-decoration: none;
             transition: var(--transition);
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
         }
 
         .dash-nav-item:hover, .dash-nav-item.active {
@@ -105,6 +116,129 @@
         .dash-nav-item i {
             font-size: 1.1rem;
             width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar Nav Dropdown */
+        .dash-nav-dropdown {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dash-dropdown-toggle {
+            justify-content: space-between;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-family: inherit;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            color: var(--text-muted);
+        }
+
+        .dash-dropdown-toggle:hover,
+        .dash-dropdown-toggle.active,
+        .dash-nav-dropdown.open > .dash-dropdown-toggle {
+            background: rgba(79, 70, 229, 0.15);
+            color: #818cf8;
+            border-color: rgba(129, 140, 248, 0.2);
+        }
+
+        .dash-dropdown-toggle .nav-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dash-dropdown-toggle .dropdown-arrow {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: auto;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .dash-nav-dropdown.open .dash-dropdown-toggle .dropdown-arrow,
+        .dash-dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
+            transform: rotate(180deg);
+            color: #818cf8;
+        }
+
+        .dash-dropdown-menu {
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            margin: 4px 0 6px 14px;
+            padding: 4px 0 4px 12px;
+            border-left: 2px solid rgba(99, 102, 241, 0.28);
+            box-sizing: border-box;
+            animation: fadeInDropdown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dash-dropdown-menu.show,
+        .dash-nav-dropdown.open > .dash-dropdown-menu {
+            display: flex;
+        }
+
+        @keyframes fadeInDropdown {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dash-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: var(--transition);
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid transparent;
+            text-align: left;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .dash-dropdown-item:hover,
+        .dash-dropdown-item.active {
+            background: rgba(79, 70, 229, 0.12);
+            color: #818cf8;
+            border-color: rgba(129, 140, 248, 0.2);
+            transform: translateX(3px);
+        }
+
+        .dash-dropdown-item i {
+            font-size: 0.85rem;
+            width: 16px;
+            text-align: center;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
+
+        .dash-dropdown-item:hover i,
+        .dash-dropdown-item.active i {
+            color: #38bdf8;
         }
 
         .dash-user-card {
@@ -284,13 +418,93 @@
                 </a>
 
                 <nav class="dash-nav">
-                    <a href="#" class="dash-nav-item active"><i class="fa-solid fa-chart-pie"></i> Overview</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-barcode"></i> Inventory & SKUs</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-warehouse"></i> Warehouses (3)</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-truck-ramp-box"></i> Inbound / POs</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-dolly"></i> Picking & Dispatch</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-bolt"></i> AI Demand Forecast</a>
-                    <a href="#" class="dash-nav-item"><i class="fa-solid fa-gear"></i> Settings & Team</a>
+                    <a href="${pageContext.request.contextPath}/customer/dashboard.jsp" class="dash-nav-item active">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </a>
+
+                    <a href="#" class="dash-nav-item">
+                        <i class="fa-solid fa-barcode"></i>
+                        <span>Inventory &amp; SKUs</span>
+                    </a>
+
+                    <!-- Warehouses Nav Item with Collapsible Submenu Dropdown -->
+                    <div class="dash-nav-dropdown" id="warehouseNavDropdown">
+                        <button type="button" class="dash-nav-item dash-dropdown-toggle" id="whDropdownToggle" onclick="toggleNavDropdown('warehouseNavDropdown')" aria-expanded="false">
+                            <div class="nav-item-content">
+                                <i class="fa-solid fa-warehouse"></i>
+                                <span>Warehouses</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dash-dropdown-menu" id="warehouseDropdownMenu">
+                            <a href="${pageContext.request.contextPath}/warehouse/new-warehouse.jsp?action=create" class="dash-dropdown-item" id="navAction-create">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>create new</span>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/warehouse/show-warehouses.jsp" class="dash-dropdown-item" id="navAction-show">
+                                <i class="fa-solid fa-table-list"></i>
+                                <span>show warehouses</span>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/warehouse/new-warehouse.jsp?action=update" class="dash-dropdown-item" id="navAction-update">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <span>Update a warehouse</span>
+                            </a>
+                            <a href="${pageContext.request.contextPath}/warehouse/new-warehouse.jsp?action=decommission" class="dash-dropdown-item" id="navAction-decommission">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Decommission warehouse</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Employees Nav Item with Collapsible Submenu Dropdown -->
+                    <div class="dash-nav-dropdown" id="employeeNavDropdown">
+                        <button type="button" class="dash-nav-item dash-dropdown-toggle" id="empDropdownToggle" onclick="toggleNavDropdown('employeeNavDropdown')" aria-expanded="false">
+                            <div class="nav-item-content">
+                                <i class="fa-solid fa-users"></i>
+                                <span>Employees</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </button>
+                        <div class="dash-dropdown-menu" id="employeeDropdownMenu">
+                            <a href="javascript:void(0)" class="dash-dropdown-item" id="empAction-create" onclick="handleEmployeeAction('create', event)">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>create new</span>
+                            </a>
+                            <a href="javascript:void(0)" class="dash-dropdown-item" id="empAction-see-all" onclick="handleEmployeeAction('see-all', event)">
+                                <i class="fa-solid fa-users-viewfinder"></i>
+                                <span>see all employees</span>
+                            </a>
+                            <a href="javascript:void(0)" class="dash-dropdown-item" id="empAction-update" onclick="handleEmployeeAction('update', event)">
+                                <i class="fa-solid fa-user-pen"></i>
+                                <span>update employee</span>
+                            </a>
+                            <a href="javascript:void(0)" class="dash-dropdown-item" id="empAction-release" onclick="handleEmployeeAction('release', event)">
+                                <i class="fa-solid fa-user-xmark"></i>
+                                <span>release employee</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="#" class="dash-nav-item">
+                        <i class="fa-solid fa-truck-ramp-box"></i>
+                        <span>Inbound / POs</span>
+                    </a>
+
+                    <a href="#" class="dash-nav-item">
+                        <i class="fa-solid fa-dolly"></i>
+                        <span>Picking &amp; Dispatch</span>
+                    </a>
+
+                    <a href="#" class="dash-nav-item">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>AI Demand Forecast</span>
+                    </a>
+
+                    <a href="#" class="dash-nav-item">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Settings &amp; Team</span>
+                    </a>
                 </nav>
             </div>
 
@@ -324,8 +538,12 @@
                     <p>Connected to <strong><%= escapeHtml(userCompany) %></strong> &bull; Plan: <span class="badge badge-primary" style="padding: 2px 8px; font-size: 0.75rem;"><%= escapeHtml(userPlan) %></span> &bull; Account ID: <code><%= escapeHtml(customerId) %></code></p>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export Reports</button>
-                    <button class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add New SKU</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="showToast('Exporting real-time telemetry and inventory reports...', 'info')">
+                        <i class="fa-solid fa-download"></i> Export Reports
+                    </button>
+                    <a href="${pageContext.request.contextPath}/warehouse/show-warehouses.jsp" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-warehouse"></i> Warehouse Fleet
+                    </a>
                 </div>
             </header>
 
@@ -374,7 +592,7 @@
                 <div class="content-card">
                     <div class="card-heading">
                         <div>
-                            <h3>Real-Time SKU Location & Telemetry</h3>
+                            <h3>Real-Time SKU Location &amp; Telemetry</h3>
                             <p style="font-size: 0.8rem; color: var(--text-dim);">Live synchronization across Central, East Coast, and West Coast facilities.</p>
                         </div>
                         <span class="badge badge-success"><span class="pulse-dot"></span> LIVE TELEMETRY</span>
@@ -384,7 +602,7 @@
                         <table class="table-mini">
                             <thead>
                                 <tr>
-                                    <th>SKU & Product</th>
+                                    <th>SKU &amp; Product</th>
                                     <th>Warehouse Bay</th>
                                     <th>Available Qty</th>
                                     <th>Unit Cost</th>
@@ -396,7 +614,7 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 700; color: #f8fafc;">Enterprise Server Blade X4</div>
-                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code>SKU-BLADE-992</code></div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code style="font-family: 'JetBrains Mono', monospace;">SKU-BLADE-992</code></div>
                                     </td>
                                     <td>Central Hub &bull; Bay A-12</td>
                                     <td style="font-weight: 700; color: #f8fafc;">1,420 Units</td>
@@ -407,7 +625,7 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 700; color: #f8fafc;">100G Fiber Transceiver Module</div>
-                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code>SKU-FIB-100G</code></div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code style="font-family: 'JetBrains Mono', monospace;">SKU-FIB-100G</code></div>
                                     </td>
                                     <td>East Coast &bull; Bay B-08</td>
                                     <td style="font-weight: 700; color: #f8fafc;">8,950 Units</td>
@@ -418,7 +636,7 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 700; color: #f8fafc;">Thermal Scanner Pro</div>
-                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code>SKU-THRM-442</code></div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code style="font-family: 'JetBrains Mono', monospace;">SKU-THRM-442</code></div>
                                     </td>
                                     <td>West Coast &bull; Bay C-02</td>
                                     <td style="font-weight: 700; color: #f59e0b;">24 Units</td>
@@ -429,7 +647,7 @@
                                 <tr>
                                     <td>
                                         <div style="font-weight: 700; color: #f8fafc;">Industrial IoT Gateway Node</div>
-                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code>SKU-IOT-881</code></div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);"><code style="font-family: 'JetBrains Mono', monospace;">SKU-IOT-881</code></div>
                                     </td>
                                     <td>Central Hub &bull; Bay D-19</td>
                                     <td style="font-weight: 700; color: #f8fafc;">3,110 Units</td>
@@ -455,7 +673,7 @@
                                 <i class="fa-solid fa-check"></i>
                             </div>
                             <div>
-                                <div style="font-size: 0.85rem; font-weight: 700; color: #f8fafc;">PO #4892 Received & Stowed</div>
+                                <div style="font-size: 0.85rem; font-weight: 700; color: #f8fafc;">PO #4892 Received &amp; Stowed</div>
                                 <div style="font-size: 0.75rem; color: var(--text-dim);">Central Hub &bull; 2 mins ago</div>
                             </div>
                         </div>
@@ -495,5 +713,56 @@
         </main>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Dashboard Sidebar & Navigation Controller Scripts -->
+    <script>
+        // Toggle Sidebar Dropdown Menu
+        function toggleNavDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+            dropdown.classList.toggle('open');
+            const menu = dropdown.querySelector('.dash-dropdown-menu');
+            const btn = dropdown.querySelector('.dash-dropdown-toggle');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+            if (btn) {
+                const isOpen = dropdown.classList.contains('open');
+                btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            }
+        }
+
+        // Handle Employee Management Submenu Actions
+        function handleEmployeeAction(action, e) {
+            if (e) e.preventDefault();
+            const actionMessages = {
+                'create': 'Opening Employee Onboarding wizard...',
+                'see-all': 'Displaying active organization personnel & warehouse operators...',
+                'update': 'Select an employee profile to update credentials & permissions...',
+                'release': 'Employee offboarding & access revocation protocol selected...'
+            };
+            showToast(actionMessages[action] || 'Employee management selected.', 'info');
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info');
+            const color = type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#38bdf8');
+            toast.innerHTML = `<i class="fa-solid ${icon}" style="color: ${color}; font-size: 1.1rem;"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.4s ease';
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+    </script>
 </body>
 </html>
