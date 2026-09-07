@@ -1,226 +1,272 @@
-# StockFlow Customer Portal (`stockflow-customer`)
+# StockFlow Customer & Warehouse Intelligence Portal (`stockflow-customer`)
 
-> **Next-Generation Inventory & Warehouse Management System**  
-> Enterprise Customer Onboarding, Authentication, and Intelligence Command Center.
+> **Next-Generation Inventory, Warehouse Fleet & Logistics Management System**  
+> Enterprise Customer Onboarding, Role-Based Authentication, Real-Time SKU Telemetry, and Multi-Node Warehouse Facility Command.
 
 ---
 
 ## 📌 Table of Contents
 1. [Overview](#-overview)
 2. [Key Capabilities](#-key-capabilities)
+   - [Marketing & Onboarding Portal](#marketing--onboarding-portal)
+   - [Customer Intelligence Command Center](#customer-intelligence-command-center)
+   - [Warehouse Facility & Fleet Management](#warehouse-facility--fleet-management)
+   - [Authentication & Security](#authentication--security)
 3. [Technology Stack](#-technology-stack)
 4. [Architecture & Workflow](#-architecture--workflow)
-   - [Architectural Overview](#architectural-overview)
-   - [Complete End-to-End Workflow](#complete-end-to-end-workflow)
-5. [Database Design & Data Model](#-database-design--data-model)
+   - [Architectural Topology](#architectural-topology)
+   - [End-to-End Registration & Auth Flow](#end-to-end-registration--auth-flow)
+   - [Warehouse Provisioning & Fleet Telemetry Flow](#warehouse-provisioning--fleet-telemetry-flow)
+5. [Database Design & Data Models](#-database-design--data-models)
+   - [Customer Document Schema (`tbl_customer_info`)](#customer-document-schema-tbl_customer_info)
+   - [Warehouse Facility Data Model](#warehouse-facility-data-model)
+   - [Auto-Configured MongoDB Indexes](#auto-configured-mongodb-indexes)
 6. [Project Structure](#-project-structure)
 7. [Configuration & Environment Variables](#-configuration--environment-variables)
 8. [Getting Started & Local Setup](#-getting-started--local-setup)
    - [Prerequisites](#prerequisites)
    - [Building the Application](#building-the-application)
    - [Running Unit Tests](#running-unit-tests)
-   - [Deployment](#deployment)
-9. [Security Implementation](#-security-implementation)
+   - [Deployment on Apache Tomcat](#deployment-on-apache-tomcat)
+   - [Application Endpoints & Routes](#application-endpoints--routes)
+9. [Demo Sandbox Accounts](#-demo-sandbox-accounts)
+10. [Security Implementation](#-security-implementation)
 
 ---
 
 ## 📖 Overview
 
-**`stockflow-customer`** is the customer-facing web application module of the **StockFlow** enterprise inventory management platform. It delivers a modern, high-performance web portal enabling B2B clients, warehouse managers, and retail operators to:
+**`stockflow-customer`** is the enterprise customer-facing and facility operations web portal of the **StockFlow** logistics and supply chain ecosystem. Built on high-performance Java EE Servlet technology, modern vanilla JavaScript, and backed by MongoDB Atlas, it equips B2B organizations, 3PL providers, warehouse supervisors, and retail operators with complete control over inventory, customer onboarding, multi-node warehouse facilities, and IoT edge telemetry.
 
-* Explore platform capabilities, pricing models, and enterprise logistics solutions.
-* Register new customer accounts with an automated **14-day Pro trial** subscription.
-* Authenticate securely using salted **BCrypt** password verification backed by **MongoDB**.
-* Access a real-time **Enterprise Inventory Command Center** featuring live SKU telemetry, stock valuation, fulfillment KPIs, and automated restock alerts.
+### Core Objectives
+* **Seamless Onboarding**: Self-service signup with automated 14-day Pro/Enterprise trial provisioning.
+* **Granular Security**: Enterprise-grade password hashing with salted **BCrypt** and secure session management.
+* **Operational Command Center**: Real-time SKU visibility, turnover tracking, restock triggers, and carrier dispatches.
+* **Multi-Node Fleet Control**: Multi-facility configuration, zone partitioning, environmental climate regulation, and live IoT sensor telemetry feeds.
 
 ---
 
 ## 🚀 Key Capabilities
 
-* **Responsive Marketing Landing Page (`/index.jsp`)**:
-  * Interactive feature highlights (multi-warehouse visibility, barcode & QR scanning, automated replenishment, AI demand forecasting).
-  * Dynamic pricing calculator with annual/monthly billing toggle (20% discount calculation).
-  * Live telemetry application preview with turnover trend visualization and SKU movement tables.
-  * Customer testimonials, solutions tailored by industry role, and interactive FAQ accordion.
-
-* **Self-Service Customer Registration (`/signup-auth`)**:
-  * Form validation, company profile collection, and terms acceptance enforcement.
-  * Instant 14-day trial period calculation (`trialStartDate` and `trialEndDate`).
+### Marketing & Onboarding Portal
+* **Enterprise Landing Page (`/index.jsp`)**:
+  * Product capability showcase (multi-warehouse visibility, barcode & RFID scanning, AI demand forecasting).
+  * Interactive pricing calculator supporting monthly and annual billing (with automatic 20% discount calculation).
+  * Interactive SKU movement preview and live warehouse velocity telemetry.
+  * Customer case studies, social proof metrics, and collapsible FAQ accordion.
+* **Self-Service Registration (`/signup-auth`, `/customer/signup/signup.jsp`)**:
+  * Real-time password strength analyzer with constraint validation.
+  * Plan selection (Starter, Pro, Enterprise) with instant 14-day trial period calculation (`trialStartDate` and `trialEndDate`).
   * Automated document persistence to MongoDB collection `tbl_customer_info`.
 
-* **Secure Authentication & Session Management (`/login-auth`, `/logout`)**:
-  * Role-based login handling (`customer` vs `staff`).
-  * Database credential lookup with BCrypt password verification.
-  * Sandbox demo fallback accounts for offline demonstration.
-  * `HttpOnly` session cookie enforcement and 60-minute automatic timeout.
+### Customer Intelligence Command Center
+* **Operational Dashboard (`/customer/dashboard.jsp`)**:
+  * Real-time KPI summaries: Total Active SKUs, Stock Valuation ($3.42M+), Fulfillment Velocity (99.8%), and Low Stock Restock Alerts.
+  * Live SKU Location & Telemetry table featuring bay allocations, stock levels, safety thresholds, and replenishment status flags.
+  * Real-time warehouse activity feed (Inbound PO receipts, carrier dispatch notifications, AI demand adjustments).
+  * Safe XSS escaping across all dynamic session attributes and company metadata.
 
-* **Customer Intelligence Command Center (`/customer/dashboard.jsp`)**:
-  * Real-time KPI summaries: Total Active SKUs, Stock Valuation, Fulfillment Velocity (99.8%), and Low Stock Warnings.
-  * Live SKU Location & Telemetry table displaying bay allocations, available quantities, reorder thresholds, and status flags.
-  * Real-time warehouse activity feed (Inbound PO receipts, carrier dispatch notifications, AI auto-replenishments).
+### Warehouse Facility & Fleet Management
+* **Connected Warehouse Fleet Directory (`/warehouse/show-warehouses.jsp`)**:
+  * Global multi-facility directory across 6+ international corridors (USA, Canada, UK, Germany, Singapore, Australia).
+  * Live search, classification filtering (Regional Fulfillment, Distribution Centers, Micro-Fulfillment, Cold Storage, Cross-Dock, Bonded FTZ), and multi-attribute sorting.
+  * **IoT Sensor Telemetry Modal**: Live inspection of ambient temperature, relative humidity, bay occupancy, dock door utilization, and real-time RFID gate portal scanning stream.
+  * **Facility Specifications Modal**: Comprehensive breakdown of structural dimensions, clear heights, pallet capacities, zoned storage partitions, and facility manager contact details.
+  * **Fleet Data Export**: One-click export of complete warehouse fleet data in **CSV** or **JSON** format.
+* **Facility Provisioning & Configuration (`/warehouse/new-warehouse.jsp`)**:
+  * Multi-section facility setup: Identification, Geo-Logistics, Structural Capacity, Partitioned Storage Zones, and Shift Management.
+  * **Instant Architecture Presets**:
+    * *Automated E-Commerce Mega-Hub* (120,000 sq ft, 8,500 pallets, 16 dock doors)
+    * *Cold-Chain Pharma Depot* (45,000 sq ft, 3,200 pallets, chilled refrigeration 2°C–8°C)
+    * *Urban Micro-Fulfillment Center* (18,000 sq ft, 1,400 pallets, high-velocity pick modules)
+    * *Maritime Bonded Cross-Dock* (95,000 sq ft, 7,000 pallets, customs bonded)
+  * Real-time topology preview card updating dynamically with user inputs.
+  * Interactive zone manager (add/remove storage partitions, high-velocity racks, mezzanine bins, biometric vaults).
+  * In-place update mode and safe facility decommissioning workflows with audit reason tracking.
+
+### Authentication & Security
+* **Multi-Role Authentication (`/login-auth`, `/customer/login/login.jsp`)**:
+  * Dual-portal role selection (`customer` vs `staff`).
+  * MongoDB credential verification using salted BCrypt.
+  * In-memory demo account fallbacks for offline sandbox demonstration and quick reviews.
+  * Automatic `lastLoginAt` auditing in MongoDB.
+  * Secure session handling with `HttpOnly` cookies and 60-minute inactivity expiration.
 
 ---
 
 ## 🛠 Technology Stack
 
-| Layer | Technology | Description |
-| :--- | :--- | :--- |
-| **Language & Platform** | Java 8 (Java EE 8 / Servlet 4.0, JSP 2.3) | Core runtime and web servlet framework |
-| **Database** | MongoDB 4.x/5.x/6.x/7.x & Atlas | Document database for customer and operational data |
-| **Database Driver** | MongoDB Java Sync Driver (`4.11.1`) | Synchronous Java driver for MongoDB connectivity |
-| **Security / Crypto** | jBCrypt (`0.4`) | Salted BCrypt password hashing and verification |
-| **Build & Packaging** | Apache Maven (`war` packaging) | Dependency management and build lifecycle |
-| **Testing** | JUnit Jupiter (`5.10.2`) | Unit and integration test suite |
-| **Frontend / UI** | HTML5, CSS3, Vanilla JavaScript, FontAwesome 6.5 | Dark-mode enterprise UI with Plus Jakarta Sans |
+| Layer | Technology | Version / Spec | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Language & Platform** | Java | Java SE 8 (1.8) / Java EE 8 | Core runtime, business logic, and web tier |
+| **Servlet Container** | Java Servlet / JSP | Servlet 4.0, JSP 2.3 | Request handling, routing, and view rendering |
+| **Database** | MongoDB & MongoDB Atlas | v4.4 - v7.0+ | Document store for customers, telemetry, and facilities |
+| **Database Driver** | MongoDB Java Sync Driver | `4.11.1` | Native thread-safe synchronous database driver |
+| **Cryptography / Security** | jBCrypt | `0.4` | Salted Blowfish-based password hashing (12 rounds) |
+| **Build & Packaging** | Apache Maven | Maven 3.6+ (`war` packaging) | Dependency resolution, packaging, and lifecycle management |
+| **Unit Testing** | JUnit Jupiter | `5.10.2` | Test execution framework for models and configuration |
+| **Frontend Styling** | Modern CSS3 | Custom Glassmorphism | Dark theme, responsive grid layouts, responsive navigation |
+| **Typography & Icons** | Google Fonts & FontAwesome | Plus Jakarta Sans, JetBrains Mono, FA 6.5.1 | Enterprise aesthetics and crisp data visualization |
+| **Client Scripting** | Vanilla JavaScript | ES6+ | Real-time calculations, sensor simulation, dynamic DOM, exports |
 
 ---
 
 ## 🔄 Architecture & Workflow
 
-### Architectural Overview
+### Architectural Topology
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Client Browser"]
-        LP["Landing Page\n(/index.jsp)"]
-        SU["Signup View\n(/customer/signup/signup.jsp)"]
-        LG["Login View\n(/customer/login/login.jsp)"]
-        DB["Customer Dashboard\n(/customer/dashboard.jsp)"]
+    subgraph ClientLayer ["Client Browser Layer"]
+        LP["Landing Page<br/>(/index.jsp)"]
+        SU["Signup Portal<br/>(/customer/signup/signup.jsp)"]
+        LG["Login Portal<br/>(/customer/login/login.jsp)"]
+        DB["Customer Dashboard<br/>(/customer/dashboard.jsp)"]
+        WH_SHOW["Fleet Directory<br/>(/warehouse/show-warehouses.jsp)"]
+        WH_NEW["Facility Setup<br/>(/warehouse/new-warehouse.jsp)"]
     end
 
-    subgraph Servlets ["Java EE Servlet Controller Layer"]
-        SignupSrv["SignupServlet\n(/signup-auth)"]
-        LoginSrv["LoginServlet\n(/login-auth)"]
-        LogoutSrv["LogoutServlet\n(/logout)"]
+    subgraph ControllerLayer ["Java EE Servlet Controller Layer"]
+        SignupSrv["SignupServlet<br/>(/signup-auth)"]
+        LoginSrv["LoginServlet<br/>(/login-auth)"]
+        LogoutSrv["LogoutServlet<br/>(/logout)"]
     end
 
-    subgraph Services ["Data Access & Security Layer"]
+    subgraph BusinessLayer ["Data Access & Business Layer"]
         CDAO["CustomerDAO"]
-        BCryptLib["BCrypt Hashing\n(gensalt: 12)"]
-        MongoConn["MongoDBConnection\n(Singleton Manager)"]
-        EnvLoader["DotEnv Loader\n(.env / Sys Env)"]
+        BCryptEngine["BCrypt Cryptographic Engine<br/>(12 Salt Rounds)"]
+        ConnMgr["MongoDBConnection<br/>(Thread-Safe Singleton)"]
+        EnvLoader["DotEnv & SysEnv Loader"]
     end
 
-    subgraph Database ["MongoDB Database"]
-        CustColl[("tbl_customer_info\ncustomers")]
-        EmpColl[("employees")]
+    subgraph PersistenceLayer ["MongoDB Database"]
+        CustTbl[("tbl_customer_info / customers<br/>(User Credentials & Subscriptions)")]
+        EmpTbl[("employees<br/>(Staff & Worker Profiles)")]
     end
 
-    LP --> SU
-    LP --> LG
-    SU -->|POST credentials & company info| SignupSrv
-    LG -->|POST email & password| LoginSrv
-    DB -->|GET /logout| LogoutSrv
+    LP -->|Explore Plans| SU
+    LP -->|Sign In| LG
+    SU -->|POST Registration| SignupSrv
+    LG -->|POST Authentication| LoginSrv
+    DB -->|Manage Facilities| WH_SHOW
+    DB -->|Provision Hub| WH_NEW
+    DB -->|Sign Out| LogoutSrv
 
-    SignupSrv -->|1. Validate & Hash| BCryptLib
-    SignupSrv -->|2. Register| CDAO
-    LoginSrv -->|1. Authenticate| CDAO
-    CDAO -->|Verify Password| BCryptLib
+    SignupSrv -->|1. Validate & Hash| BCryptEngine
+    SignupSrv -->|2. Register Customer| CDAO
+    LoginSrv -->|1. Authenticate Credentials| CDAO
+    CDAO -->|Verify Salted Hash| BCryptEngine
     LogoutSrv -->|Invalidate Session| LG
 
-    CDAO --> MongoConn
-    MongoConn --> EnvLoader
-    MongoConn -->|Read / Write Documents| CustColl
-    MongoConn -->|Ensure Indexes| EmpColl
+    CDAO --> ConnMgr
+    ConnMgr --> EnvLoader
+    ConnMgr -->|Read / Write Documents| CustTbl
+    ConnMgr -->|Ensure Unique Indexes| EmpTbl
 
-    SignupSrv -->|3. Set Session & Redirect| DB
-    LoginSrv -->|2. Set Session & Redirect| DB
+    SignupSrv -->|Create Session & Redirect| DB
+    LoginSrv -->|Create Session & Redirect| DB
+    WH_SHOW <-->|Fleet Topology & IoT Sensors| WH_NEW
 ```
 
 ---
 
-### Complete End-to-End Workflow
+### End-to-End Registration & Auth Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as Customer / User
-    participant Browser as Web Browser
+    participant Browser as Client Browser
     participant Servlet as SignupServlet / LoginServlet
     participant DAO as CustomerDAO
     participant DB as MongoDB (tbl_customer_info)
     participant Session as HttpSession
 
-    Note over User, Browser: 1. Customer Registration Flow
-    User->>Browser: Fill Signup Form (Name, Company, Email, Password, Plan)
+    Note over User, DB: 1. Self-Service Customer Registration Flow
+    User->>Browser: Submit Signup Form (Name, Email, Password, Company, Plan)
     Browser->>Servlet: POST /signup-auth
     Servlet->>DAO: existsByEmail(email)
-    DAO->>DB: countDocuments({ email })
-    DB-->>DAO: count = 0
-    Servlet->>DAO: registerCustomer(...)
+    DAO->>DB: countDocuments({ email: normalizedEmail })
+    DB-->>DAO: 0 (No existing account)
+    Servlet->>DAO: registerCustomer(name, company, email, pwd, plan, size, terms)
     DAO->>DAO: BCrypt.hashpw(password, gensalt(12))
-    DAO->>DAO: Compute 14-day trial end date
+    DAO->>DAO: Calculate 14-day trial end date
     DAO->>DB: insertOne(customerDocument)
     DB-->>DAO: Insert Success (ObjectId)
-    DAO-->>Servlet: Customer Object
+    DAO-->>Servlet: Customer Entity
     Servlet->>Session: setAttribute(user, customerId, company, role, plan)
     Servlet-->>Browser: Redirect 302 -> /customer/dashboard.jsp?status=registered
-    Browser->>User: Render Dashboard
+    Browser->>User: Render Dashboard with Welcome Alert
 
-    Note over User, Browser: 2. Customer Authentication Flow
-    User->>Browser: Submit Login Form (Email, Password)
+    Note over User, DB: 2. Customer Authentication Flow
+    User->>Browser: Submit Login Form (Email, Password, Role)
     Browser->>Servlet: POST /login-auth
     Servlet->>DAO: authenticate(email, password)
-    DAO->>DB: find({ email })
+    DAO->>DB: find({ email: normalizedEmail })
     DB-->>DAO: Customer Document
     DAO->>DAO: BCrypt.checkpw(password, passwordHash)
-    DAO->>DB: updateOne({ email }, { lastLoginAt: now() })
-    DAO-->>Servlet: Authenticated Customer
-    Servlet->>Session: setAttribute(user, customerId, company, role, plan)
+    DAO->>DB: updateOne({ email }, { $set: { lastLoginAt: now() } })
+    DAO-->>Servlet: Authenticated Customer Entity
+    Servlet->>Session: setAttribute(user, customerId, company, role, plan, authTime)
     Servlet-->>Browser: Redirect 302 -> /customer/dashboard.jsp
     Browser->>User: Render Command Center Dashboard
 
-    Note over User, Browser: 3. Session Invalidation (Logout)
+    Note over User, DB: 3. Session Teardown Flow
     User->>Browser: Click Logout
     Browser->>Servlet: GET /logout
     Servlet->>Session: session.invalidate()
     Servlet-->>Browser: Redirect 302 -> /customer/login/login.jsp?msg=logged_out
-    Browser->>User: Render Login Screen with Logout Banner
+    Browser->>User: Render Login Screen with Logout Confirmation
 ```
-
-#### Detailed Lifecycle Steps:
-
-1. **Visitor Discovery (`/index.jsp`)**:
-   * The user arrives at the landing page, reviews platform metrics, interactive telemetry preview, client reviews, pricing plans, and FAQs.
-   * Clicking **"Start 14-Day Free Trial"** navigates to `/customer/signup/signup.jsp` (pre-selecting the desired subscription plan if query params are present).
-
-2. **Onboarding & Registration (`/signup-auth`)**:
-   * Form inputs (`fullName`, `companyName`, `email`, `password`, `confirmPassword`, `plan`, `companySize`, `terms`) are validated by `SignupServlet`.
-   * Passwords must be at least 8 characters and match confirmation.
-   * `CustomerDAO.existsByEmail()` verifies uniqueness in MongoDB.
-   * Passwords are securely hashed with `BCrypt.gensalt(12)`.
-   * A 14-day active trial subscription is calculated and attached to the domain model.
-   * The customer record is written to MongoDB collection `tbl_customer_info`.
-   * An active `HttpSession` is initialized with user metadata and redirected to the dashboard.
-
-3. **Customer & Staff Authentication (`/login-auth`)**:
-   * The user supplies credentials and selects a portal role (`customer` or `staff`).
-   * `CustomerDAO.authenticate()` searches MongoDB by normalized email, tests the BCrypt hash, and timestamps `lastLoginAt`.
-   * If valid, session parameters (`user`, `customerId`, `role`, `company`, `email`, `plan`, `authTime`) are populated.
-   * **Demo Fallback**: Supports sandbox evaluation accounts (`alex.morgan@acmelogistics.com` and internal staff accounts) when running disconnected.
-
-4. **Portal Exploration (`/customer/dashboard.jsp`)**:
-   * Verifies the active session, escaping all rendered session attributes to prevent XSS.
-   * Displays live operational metrics, inventory value, and a real-time SKU bay table.
-
-5. **Session Teardown (`/logout`)**:
-   * `LogoutServlet` calls `session.invalidate()` and safely redirects back to `/customer/login/login.jsp?msg=logged_out`.
 
 ---
 
-## 🗄 Database Design & Data Model
+### Warehouse Provisioning & Fleet Telemetry Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Customer Admin / Facility Manager
+    participant UI as Warehouse UI (JSP + JS)
+    participant Fleet as Fleet Store (Local & Session State)
+    participant Edge as Edge IoT Simulator (Sensors & RFID)
+
+    Admin->>UI: Navigate to Warehouse Directory (/warehouse/show-warehouses.jsp)
+    UI->>Fleet: Load active warehouse nodes (13 default facilities)
+    Fleet-->>UI: Render grid & list views with live status tags
+
+    Admin->>UI: Click "Inspect Telemetry" on a Warehouse Node
+    UI->>Edge: Query live telemetry for facility code (e.g. WH-CHI-01)
+    Edge-->>UI: Stream sensor metrics (Temp: 20.4°C, Humidity: 42.8%, RFID Scan Stream)
+    UI->>Admin: Display interactive Telemetry Inspector Modal
+
+    Admin->>UI: Click "Provision New Facility" (/warehouse/new-warehouse.jsp)
+    Admin->>UI: Select Preset (e.g. "Cold-Chain Pharma Depot")
+    UI->>UI: Auto-populate zones, climate (-20°C to -10°C), clear height & pallet counts
+    Admin->>UI: Adjust capacity / add custom partition zone
+    Admin->>UI: Click "Provision Facility & Deploy Node"
+    UI->>Fleet: Validate inputs & save new facility record
+    Fleet-->>UI: Save Success
+    UI->>Admin: Show success toast notification & redirect to Fleet Directory
+```
+
+---
+
+## 🗄 Database Design & Data Models
 
 ### Customer Document Schema (`tbl_customer_info`)
+
+Customer records are stored as flexible BSON documents with strict unique constraints on identity keys:
 
 ```json
 {
   "_id": { "$oid": "66db81f21a4e123456789abc" },
   "customerId": "66db81f21a4e123456789abc",
   "fullName": "Jordan Vance",
-  "companyName": "Apex Distro LLC",
+  "companyName": "Apex Distro & Logistics LLC",
   "companySize": "21-100",
   "email": "jordan.vance@apexdistro.com",
-  "passwordHash": "$2a$12$e8Yx...",
+  "passwordHash": "$2a$12$e8Yx9p1K0qZb...",
   "role": "customer",
   "subscription": {
     "plan": "pro",
@@ -234,17 +280,52 @@ sequenceDiagram
   },
   "termsAccepted": true,
   "termsAcceptedAt": { "$date": "2026-09-06T16:00:00.000Z" },
-  "lastLoginAt": { "$date": "2026-09-06T16:05:00.000Z" },
+  "lastLoginAt": { "$date": "2026-09-07T14:32:00.000Z" },
   "createdAt": { "$date": "2026-09-06T16:00:00.000Z" },
   "updatedAt": { "$date": "2026-09-06T16:00:00.000Z" }
 }
 ```
 
+### Warehouse Facility Data Model
+
+Warehouse facility records encapsulate geo-logistics, structural capacities, environmental metrics, and partitioned bay zones:
+
+```json
+{
+  "id": "wh-001",
+  "name": "Central Logistics Hub",
+  "code": "WH-CHI-01",
+  "type": "Distribution Center",
+  "status": "Active & Operational",
+  "address": "7420 North Port Boulevard, Suite 100",
+  "city": "Chicago",
+  "state": "IL",
+  "zip": "60666",
+  "country": "United States",
+  "zone": "Midwest Freight Hub • I-90",
+  "area": 110000,
+  "pallets": 8500,
+  "docks": 16,
+  "clearHeight": 36,
+  "climate": "Standard Ambient (15°C - 25°C)",
+  "manager": "Marcus Rivera",
+  "email": "m.rivera@stockflow.io",
+  "phone": "+1 (312) 555-0199",
+  "shifts": "24/7 Continuous (3 Shifts)",
+  "features": ["Hazmat Certified", "RFID Gates", "Customs Bonded", "IoT Sensor Mesh"],
+  "zones": [
+    { "name": "Zone A: High Velocity Pallets", "type": "Heavy Racking (Pallet-In Pallet-Out)", "capacity": 4500 },
+    { "name": "Zone B: Case & Tote Pick Module", "type": "Mezzanine Shelving & Bins", "capacity": 2500 },
+    { "name": "Zone C: Secure Vault / High-Value", "type": "Biometric Enclosed Caging", "capacity": 1500 }
+  ]
+}
+```
+
 ### Auto-Configured MongoDB Indexes
-Upon application startup, `MongoDBConnection.ensureIndexes()` automatically establishes unique sparse indexes:
-* `tbl_customer_info`: `email` (unique, sparse), `customerId` (unique, sparse)
-* `customers`: `email` (unique, sparse), `customerId` (unique, sparse)
-* `employees`: `email` (unique, sparse), `employeeId` (unique, sparse)
+On bootstrap, `MongoDBConnection.ensureIndexes()` automatically provisions unique sparse indexes to guarantee data integrity:
+* `tbl_customer_info`: `email` (Ascending, Unique, Sparse), `customerId` (Ascending, Unique, Sparse)
+* `customers`: `email` (Ascending, Unique, Sparse), `customerId` (Ascending, Unique, Sparse)
+* `employees`: `email` (Ascending, Unique, Sparse), `employeeId` (Ascending, Unique, Sparse)
 
 ---
 
@@ -252,77 +333,94 @@ Upon application startup, `MongoDBConnection.ensureIndexes()` automatically esta
 
 ```
 stockflow-customer/
-├── .env                                    # MongoDB connection strings and environment configurations
-├── .gitignore                              # Git exclusion rules
-├── pom.xml                                 # Maven project descriptor and dependencies
-├── mvnw / mvnw.cmd                         # Cross-platform Maven Wrapper executables
+├── .env                                         # Environment variables & MongoDB connection config
+├── .gitignore                                   # Git ignore rules
+├── pom.xml                                      # Maven project descriptor & dependency configuration
+├── mvnw / mvnw.cmd                              # Maven Wrapper executables (cross-platform)
+├── README.md                                    # Comprehensive system documentation
 ├── src/
 │   ├── main/
 │   │   ├── java/com/inventory/stockflowcustomer/
-│   │   │   ├── LoginServlet.java           # Authentication handler for customer & staff logins
-│   │   │   ├── LogoutServlet.java          # Session invalidation controller
-│   │   │   ├── SignupServlet.java          # Customer registration & trial creation controller
+│   │   │   ├── customer/
+│   │   │   │   ├── LoginServlet.java            # POST /login-auth controller (BCrypt & demo auth)
+│   │   │   │   ├── LogoutServlet.java           # GET /logout session invalidation controller
+│   │   │   │   └── SignupServlet.java           # POST /signup-auth customer onboarding controller
 │   │   │   ├── dao/
-│   │   │   │   └── CustomerDAO.java        # MongoDB queries, BCrypt auth, and persistence logic
+│   │   │   │   └── CustomerDAO.java             # MongoDB data access, BCrypt hashing, and queries
 │   │   │   ├── db/
-│   │   │   │   └── MongoDBConnection.java  # Singleton client manager, .env parser & index initializer
+│   │   │   │   └── MongoDBConnection.java       # Singleton client manager, .env parser & indexer
 │   │   │   └── model/
-│   │   │       └── Customer.java           # Customer & Subscription domain entity with BSON converters
+│   │   │       └── Customer.java                # Customer & Subscription domain entity with BSON mapping
 │   │   ├── resources/
-│   │   │   └── META-INF/beans.xml          # CDI configuration descriptor
+│   │   │   └── META-INF/
+│   │   │       └── beans.xml                    # CDI configuration descriptor
 │   │   └── webapp/
 │   │       ├── WEB-INF/
-│   │       │   └── web.xml                 # Web application configuration (session timeout, cookies)
-│   │       ├── index.jsp                   # StockFlow Marketing & Product Landing Page
-│   │       ├── dashboard.jsp               # Root forwarder to /customer/dashboard.jsp
-│   │       ├── login.jsp                   # Root forwarder to /customer/login/login.jsp
-│   │       ├── signup.jsp                  # Root forwarder to /customer/signup/signup.jsp
-│   │       └── customer/
-│   │           ├── dashboard.jsp           # Main Customer Command Center Dashboard
-│   │           ├── login.jsp               # Login forwarder
-│   │           ├── signup.jsp              # Signup forwarder
+│   │       │   └── web.xml                      # Deployment descriptor (session timeout, cookie security)
+│   │       ├── index.jsp                        # StockFlow Product Landing Page & Pricing Calculator
+│   │       ├── dashboard.jsp                    # Root forwarder -> /customer/dashboard.jsp
+│   │       ├── login.jsp                        # Root forwarder -> /customer/login/login.jsp
+│   │       ├── signup.jsp                       # Root forwarder -> /customer/signup/signup.jsp
+│   │       ├── customer/
+│   │       │   ├── dashboard.jsp                # Customer Intelligence Command Center Dashboard
+│   │       │   ├── login.jsp                    # Forwarder to login/login.jsp
+│   │       │   ├── signup.jsp                   # Forwarder to signup/signup.jsp
+│   │       │   ├── css/
+│   │       │   │   ├── login.css                # Glassmorphic styling for login portal
+│   │       │   │   ├── signup.css               # Multi-step styling for signup portal
+│   │       │   │   └── style.css                # Global design system, sidebar, KPIs, tables
+│   │       │   ├── js/
+│   │       │   │   ├── login.js                 # Role toggling, demo fill, and client validation
+│   │       │   │   ├── main.js                  # Navigation drawer, FAQ accordion, smooth scrolling
+│   │       │   │   └── signup.js                # Password strength analyzer & signup validation
+│   │       │   ├── login/
+│   │       │   │   ├── index.jsp                # Login view alias
+│   │       │   │   └── login.jsp                # Customer & Staff login portal
+│   │       │   └── signup/
+│   │       │       ├── index.jsp                # Signup view alias
+│   │       │       └── signup.jsp               # Customer registration and trial selection view
+│   │       └── warehouse/
+│   │           ├── new-warehouse.jsp            # Facility provisioning, presets & topology editor
+│   │           ├── show-warehouses.jsp          # Fleet directory, IoT telemetry modal & exports
 │   │           ├── css/
-│   │           │   ├── login.css           # Styling for login portal
-│   │           │   ├── signup.css          # Styling for registration flow
-│   │           │   └── style.css           # Global theme, navbar, hero, cards, and dashboard styles
-│   │           ├── js/
-│   │           │   ├── login.js            # Login client-side validation and role toggles
-│   │           │   ├── main.js             # Mobile drawer, FAQ accordion, smooth scrolling
-│   │           │   └── signup.js           # Password strength meter and signup validation
-│   │           ├── login/
-│   │           │   ├── index.jsp           # Login view alias
-│   │           │   └── login.jsp           # Customer and staff login page
-│   │           └── signup/
-│   │               ├── index.jsp           # Signup view alias
-│   │               └── signup.jsp          # Customer registration and plan selection view
+│   │           │   ├── show-warehouses.css      # Grid/list views, filter pills, and modal styling
+│   │           │   └── warehouse.css            # Facility form layout, zone cards, and preview panel
+│   │           └── js/
+│   │               ├── show-warehouses.js       # Fleet search, filter, CSV/JSON export, live telemetry
+│   │               └── warehouse.js             # Preset templates, zone builder, and update logic
 │   └── test/
 │       └── java/com/inventory/stockflowcustomer/
-│           ├── CustomerModelTest.java      # Model BSON serialization, equals/hash, and BCrypt tests
-│           └── MongoDBConnectionTest.java  # .env configuration resolution tests
+│           ├── CustomerModelTest.java           # Model serialization, equals/hashCode, and BCrypt tests
+│           └── MongoDBConnectionTest.java       # .env resolution and environment fallback tests
 ```
 
 ---
 
 ## ⚙ Configuration & Environment Variables
 
-The project dynamically loads configurations with fallback resolution precedence:
+The application resolves database connection parameters using a cascading resolution hierarchy:
 1. **Operating System Environment Variables** (`System.getenv`)
 2. **Java System Properties** (`System.getProperty`)
-3. **Local `.env` File** (resolved from working directory, parent directory, or classpath)
+3. **Local `.env` File** (automatically discovered from working directory, parent paths, Tomcat `conf/`, or classpath)
 
-Create a `.env` file in the project root:
+### Sample `.env` Configuration
+Create a `.env` file in the project root or your Tomcat execution directory:
 
 ```ini
-# MongoDB Connection String (Atlas or Local)
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/?retryWrites=true&w=majority&appName=StockFlowCluster
+# =============================================================================
+# StockFlow MongoDB Atlas Configuration
+# =============================================================================
+
+# Full MongoDB Connection URI (Atlas SRV or Standard)
+MONGODB_URI=mongodb+srv://stockflow_admin:SecurePassword123@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority&appName=StockFlowCluster
 
 # Target Database Name
 MONGODB_DATABASE=db_stockflow
 
-# Optional Component Credentials (Alternative to full URI)
-MONGODB_USER=your_db_user
-MONGODB_PASSWORD=your_db_password
-MONGODB_HOST=your_db_host
+# Optional Component Parameters (used if MONGODB_URI is not supplied)
+# MONGODB_USER=stockflow_admin
+# MONGODB_PASSWORD=SecurePassword123
+# MONGODB_HOST=cluster0.abcde.mongodb.net
 ```
 
 ---
@@ -330,13 +428,13 @@ MONGODB_HOST=your_db_host
 ## 🚀 Getting Started & Local Setup
 
 ### Prerequisites
-* **Java Development Kit (JDK)**: Version 8 or higher (Java 8 / 11 / 17 / 21)
-* **Maven**: Version 3.6+ (or use the included `./mvnw` / `mvnw.cmd`)
-* **Servlet Container**: Apache Tomcat 9.x+ or any Java EE 8 / Jakarta EE compatible server
+* **Java Development Kit (JDK)**: Version 8 or higher (Java 8, 11, 17, or 21 supported)
+* **Maven**: Version 3.6+ (or use the packaged `./mvnw` / `mvnw.cmd`)
+* **Servlet Container**: Apache Tomcat 9.x+ (or any Java EE 8 / Jakarta EE compatible container)
 * **MongoDB**: MongoDB Atlas Cluster or local MongoDB instance (v4.4+)
 
 ### Building the Application
-To compile all classes, run tests, and assemble the deployable `war` archive:
+To compile all Java classes, validate resources, execute tests, and package the WAR artifact:
 
 ```bash
 # On Windows (PowerShell / CMD)
@@ -345,13 +443,14 @@ To compile all classes, run tests, and assemble the deployable `war` archive:
 # On Linux / macOS
 ./mvnw clean package
 ```
-The packaged artifact will be generated at:
+
+The compiled web application archive will be placed at:
 ```
 target/stockflowcustomer-1.0-SNAPSHOT.war
 ```
 
 ### Running Unit Tests
-Execute the JUnit 5 test suite:
+Execute the JUnit Jupiter test suite:
 
 ```bash
 # On Windows
@@ -361,27 +460,58 @@ Execute the JUnit 5 test suite:
 ./mvnw test
 ```
 
-### Deployment
-1. Copy the generated `target/stockflowcustomer-1.0-SNAPSHOT.war` (or rename to `stockflow-customer.war`) into your Tomcat `webapps/` directory.
-2. Ensure your `.env` file exists in the directory where Tomcat is launched, or configure environment variables in your server profile.
+### Deployment on Apache Tomcat
+1. Copy the generated `target/stockflowcustomer-1.0-SNAPSHOT.war` (or rename to `stockflowcustomer.war` / `ROOT.war`) into the Tomcat `webapps/` folder.
+2. Place your `.env` configuration file in the Tomcat root directory or export the `MONGODB_URI` environment variable.
 3. Start Tomcat:
    ```bash
    # Windows
-   catalina.bat run
-   # Linux/macOS
-   catalina.sh run
+   bin\catalina.bat run
+
+   # Linux / macOS
+   bin/catalina.sh run
    ```
-4. Access the application in your browser:
-   * **Landing Page**: `http://localhost:8080/stockflowcustomer/`
-   * **Customer Login**: `http://localhost:8080/stockflowcustomer/customer/login/login.jsp`
-   * **Customer Signup**: `http://localhost:8080/stockflowcustomer/customer/signup/signup.jsp`
+
+### Application Endpoints & Routes
+
+| Path | Purpose | Access |
+| :--- | :--- | :--- |
+| `http://localhost:8085/stockflowcustomer/` | Marketing & Product Landing Page | Public |
+| `http://localhost:8085/stockflowcustomer/customer/signup/signup.jsp` | Customer Registration & Trial Onboarding | Public |
+| `http://localhost:8085/stockflowcustomer/customer/login/login.jsp` | Customer & Staff Authentication Screen | Public |
+| `http://localhost:8085/stockflowcustomer/customer/dashboard.jsp` | Customer Intelligence Command Center | Authenticated |
+| `http://localhost:8085/stockflowcustomer/warehouse/show-warehouses.jsp` | Connected Warehouse Fleet Directory & Telemetry | Authenticated |
+| `http://localhost:8085/stockflowcustomer/warehouse/new-warehouse.jsp` | Facility Provisioning & Topology Configuration | Authenticated |
+| `http://localhost:8085/stockflowcustomer/logout` | Session Invalidation & Logout | Authenticated |
+
+*(Note: Port `8085` or `8080` depends on your Tomcat `conf/server.xml` HTTP connector configuration).*
+
+---
+
+## 🔑 Demo Sandbox Accounts
+
+For offline evaluation, automated demos, and sandbox reviews without an active database connection, the application supports pre-configured credentials:
+
+| Role | Username / Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Customer (Admin)** | `alex.morgan@acmelogistics.com` | `StockFlow2026!` | Customer Dashboard, Warehouse Directory, Facility Provisioning |
+| **Customer (Admin Alt)** | `alex.morgan@acmelogistics.com` | `StockFlow#2026` | Customer Dashboard, Warehouse Directory, Facility Provisioning |
+| **Staff / Operations** | `admin@stockflow.internal` | `AdminPass2026!` | Customer & Staff Management, System Telemetry |
+| **Staff / Operations** | `staff.sarah@stockflow.internal` | `StockFlow2026!` | Staff Operations, Inbound POs & Logistics Fleet |
+
+> **Tip**: On the login screen (`/customer/login/login.jsp`), you can click the quick-demo buttons to instantly populate these credentials.
 
 ---
 
 ## 🔒 Security Implementation
 
-* **BCrypt Password Hashing**: Passwords are never stored in plaintext. They are salted and hashed with `BCrypt.gensalt(12)` prior to database persistence.
-* **Input Sanitization & Output Escaping**: Server-side validation on email patterns, password constraints, and HTML entity escaping on JSPs to mitigate XSS risks.
-* **Secure Session Cookies**: `web.xml` enforces `<http-only>true</http-only>` to protect session IDs from JavaScript interception.
-* **Session Expiry**: Inactive sessions automatically expire after 60 minutes.
-* **Unique Constraints**: MongoDB unique indexes on `email` and `customerId` prevent duplicate account creation and race conditions.
+* **Salted BCrypt Password Hashing**: Passwords are never stored in plaintext. They are salted and hashed with `BCrypt.gensalt(12)` before writing to MongoDB.
+* **Input Sanitization & Validation**:
+  * Strict email regex validation (`^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$`).
+  * Minimum 8-character password enforcement with matching confirmation checks.
+  * Explicit terms and conditions acceptance verification.
+* **XSS Prevention**: JSP scriptlets utilize custom HTML escaping (`escapeHtml`) on all user-controlled session variables (`user`, `company`, `role`, `customerId`).
+* **Session Hardening**:
+  * `web.xml` enforces `<http-only>true</http-only>` session cookies to prevent client-side script interception.
+  * Inactive session timeout automatically set to 60 minutes (`<session-timeout>60</session-timeout>`).
+* **Database Unique Constraints**: Unique sparse indexes on `email` and `customerId` prevent concurrency race conditions during onboarding.
